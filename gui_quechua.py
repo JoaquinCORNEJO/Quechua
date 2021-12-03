@@ -1,5 +1,5 @@
 import tkinter as tk
-
+from tkinter import LEFT
 class Quechua(tk.Frame):
     def __init__(self, parent= None):
         tk.Frame.__init__(self, parent)
@@ -7,9 +7,20 @@ class Quechua(tk.Frame):
         self.pack()
         self.set_constants()
         self.make_canvas()
+        self.frame_options = self.make_option_frame()
+        self.make_mode_list(self.frame_options)
+        self.make_subject_list(self.frame_options)
         self.make_title_frame()
-        self.make_mode_list()
+        self.make_question_frame()
         
+    def selection_mode(self, var):
+        self.mode = var.get()
+
+    def selection_subject(self, var):
+        self.subject = var.get()
+
+    def start(self): 
+        print('Empezamos a jugar')
 
     def set_constants(self):
         # Set window dimensions
@@ -22,35 +33,67 @@ class Quechua(tk.Frame):
         self.canvas.pack()
         
         self.img = tk.PhotoImage(file= './lanscape.png') 
-        self.bg = self.canvas.create_image(0.1, 0.1, image= self.img, anchor = "nw")
+        self.bg = self.canvas.create_image(0, 0, image= self.img, anchor = "nw")
 
     def make_title_frame(self): 
-        self.frame_title = tk.Frame(self, bg= '#80c1ff', bd= 5)
-        self.frame_title.place(relx= 0.5, rely= 0.05, relwidth= 0.75, relheight= 0.15, anchor= 'n')
+        frame_title = tk.Frame(self, bg= '#80c1ff', bd= 5)
+        frame_title.place(relx= 0.5, rely= 0.2, relwidth= 0.5, relheight= 0.15, anchor= 'n')
 
         text = tk.StringVar()
-        text.set('Bienvenido!\nVamos a aprender quechua jugando')
-        self.text_title = tk.Label(self.frame_title, textvariable= text, font= ('Arial', 14))
-        self.text_title.place(relwidth= 1, relheight= 1)
+        text.set('Bienvenido!\nVamos a aprender quechua')
+        text_title = tk.Label(frame_title, textvariable= text, font= ('Arial', 12))
+        text_title.place(relwidth= 0.80, relheight= 1)
 
-    # ----------------
-    def sel(self, var):
-        selection = "You selected the option " + str(var.get())
-        print(selection)
+        button = tk.Button(frame_title, text= 'Jugar !', 
+                            bg= '#5dabd9',
+                            font= ('Arial', 10), 
+                            command= lambda: self.start(),
+                            )
+        button.place(relx= 0.81, relwidth= 0.18, relheight= 1)
 
-    def make_mode_list(self): 
+    def make_option_frame(self): 
+        frame_options = tk.Frame(self, bd= 5)
+        frame_options.place(relx= 0.5, rely= 0.0, relwidth= 1, relheight= 0.10, anchor= 'n')
+        return frame_options
+
+    def make_mode_list(self, master): 
         # Set variable 
         var = tk.IntVar()
 
         # Dictionary to create multiple buttons
         values = {"Quechua a español" : "1",
-                "Español a quechua" : "2"}
+                  "Español a quechua" : "2"}
         
         # Loop is used to create multiple Radiobuttons
         # rather than creating each button separately
         for (text, value) in values.items():
-            tk.Radiobutton(self, text = text, variable= var,
-                            command= lambda: self.sel(var), value = value).pack()
+            tk.Radiobutton(master, text = text, variable= var,
+                            command= lambda: self.selection_mode(var), value = value).pack(side=LEFT, anchor= 'w')
+
+    def make_subject_list(self, master): 
+        # Set variable 
+        var = tk.IntVar()
+
+        # Dictionary to create multiple buttons
+        values = {"Sustantivos" : "1",
+                  "Verbos" : "2", 
+                  "Frases" : "3"}
+        
+        # Loop is used to create multiple Radiobuttons
+        # rather than creating each button separately
+        for (text, value) in values.items():
+            tk.Radiobutton(master, text = text, 
+                            variable= var,
+                            command= lambda: self.selection_subject(var), 
+                            bg= '#80c1ff',
+                            value = value).pack(side=LEFT, anchor= 'w')
+    
+    def make_question_frame(self): 
+        frame_title = tk.Frame(self, bg= 'white', bd= 5)
+        frame_title.place(relx= 0.5, rely= 0.4, relwidth= 0.8, relheight= 0.4, anchor= 'n')
+
+
+
 
 root = tk.Tk()
 Quechua(root)
