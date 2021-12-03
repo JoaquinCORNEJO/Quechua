@@ -3,16 +3,18 @@ import random
 import numpy as np
 
 # Import csv file
-file = pd.read_csv('./raw_quechua.csv', 
+file_verbs = pd.read_csv('./raw_verbos.csv', 
                     delimiter= ';', 
                     header= 0, 
                     names= ['quechua','espanol'])   
-
-# Convert file's type
-data = pd.DataFrame(data= file)
-
-# Set numbers of entries
-nb_data_rows = int(data.size/2) # 2 columns
+file_nouns = pd.read_csv('./raw_sustantivos.csv', 
+                    delimiter= ';', 
+                    header= 0, 
+                    names= ['quechua','espanol'])   
+file_phrases = pd.read_csv('./raw_frases.csv', 
+                    delimiter= ';', 
+                    header= 0, 
+                    names= ['quechua','espanol'])   
 
 # Open application
 print('Bienvenido!\nPractiquemos quechua!\n')
@@ -23,8 +25,27 @@ print('1) Quechua a español\n2) Español a quechua\n')
 mode = input()
 mode = int(mode)
 
+print('Que grupo de palabras quieres practicar ?')
+print('1) Verbos\n2) Sustantivos\n3) Frases')
+groupe = input()
+groupe = int(groupe)
+
+# Convert file's type and select groupe of words
+groupe_exist = 1
+if groupe == 1: 
+    data = pd.DataFrame(data= file_verbs)
+elif groupe == 2: 
+    data = pd.DataFrame(data= file_nouns)
+elif groupe == 3:
+    data = pd.DataFrame(data= file_phrases)
+else: 
+    groupe_exist = 0
+
+# Set numbers of entries
+nb_data_rows = int(data.size/2) # 2 columns
+
 to_be_continued = 1
-while to_be_continued == 1:
+while to_be_continued == 1 and groupe_exist == 1:
 
     # Get number of trials
     nb_trials = input('\nCuantas palabras quieres practicar ?\n')
