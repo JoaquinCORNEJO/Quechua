@@ -1,5 +1,33 @@
+# Python libraries
 import tkinter as tk
 from tkinter import LEFT
+import pandas as pd 
+import random
+
+# Import csv file
+file_verbs = pd.read_csv('./raw_verbos.csv', 
+                    delimiter= ';', 
+                    header= 0, 
+                    names= ['quechua','espanol'])   
+file_nouns = pd.read_csv('./raw_sustantivos.csv', 
+                    delimiter= ';', 
+                    header= 0, 
+                    names= ['quechua','espanol'])   
+file_phrases = pd.read_csv('./raw_frases.csv', 
+                    delimiter= ';', 
+                    header= 0, 
+                    names= ['quechua','espanol'])   
+
+# Convert file's type and select groupe of words
+def get_data(subject):
+    if subject == 1: 
+        data = pd.DataFrame(data= file_verbs)
+    elif subject == 2: 
+        data = pd.DataFrame(data= file_nouns)
+    elif subject == 3:
+        data = pd.DataFrame(data= file_phrases)
+    return data
+
 class Quechua(tk.Frame):
     def __init__(self, parent= None):
         tk.Frame.__init__(self, parent)
@@ -21,24 +49,32 @@ class Quechua(tk.Frame):
         # Set title frame and play button
         self.make_title_frame()
 
+    def refresh_data(self): 
+        self.data = get_data(self.subject)
+
     def selection_mode(self, var):
         self.mode = var.get()
+        print('Mode %d' %(self.mode,))
 
     def selection_subject(self, var):
         self.subject = var.get()
+        self.refresh_data()
+        print('Subject %d' %(self.subject,))
 
-    def refresh(self, master):
-        master.destroy()
-        self.make_question_frame()
+    def selection_user_answer(self, var):
+        self.user_answer = var.get()
 
     def start(self, master): 
-        self.refresh(master)
+        self.print_question(master)
         print('Empezamos a jugar')
 
     def set_constants(self):
         # Set window dimensions
         self.__HEIGHT = 450
         self.__WIDTH = 600  
+        self.subject = 1
+        self.user_answer = 1
+        self.mode = 1
 
     def make_canvas(self):
         self.winfo_toplevel().title('Quechua')
@@ -122,11 +158,65 @@ class Quechua(tk.Frame):
                             relheight= 0.4, 
                             anchor= 'n')
         return frame_question
+
+    def print_question(self, master): 
+
+        # ------------------------------------------
+        # Get data
+        data = self.data
+
+        # Set numbers of entries
+        nb_data_rows = int(data.size/2) # 2 columns
+        
+        # Create 3 random numbers
+        self.alternatives = random.sample(range(1, nb_data_rows-1), 3)
+
+        # Select right answers
+        self.right_answer = random.choice(self.alternatives)
+
+        # Get indice of right answer
+        self.ind_right_answer = self.alternatives.index(self.right_answer) + 1
+
+        # -----------------------------------
+        varText = tk.StringVar()
+        if self.mode == 1: 
+            varText.set("Imatataq castellanopi ninantaq " 
+                        + data.quechua[self.alternatives[self.ind_right_answer]]
+                        + " ?")
+        elif self.mode == 2:
+            varText.set("Como se dice en quechua "
+                        + data.espanol[self.alternatives[self.ind_right_answer]]
+                        + " ?")
+        
+        question = tk.Label(master, 
+                            text= varText.get(),
+                            font= ('Arial', 11))
+        question.place(relwidth= 1, relheight= 0.1)
+
+        # Print values
+        var = tk.IntVar()
+
+        if self.mode == 1: 
+            values = {data.espanol[self.alternatives[0]] : "1",
+                        data.espanol[self.alternatives[1]] : "2", 
+                        data.espanol[self.alternatives[2]] : "3", }
+            
+        elif self.mode == 2: 
+            values = {data.quechua[self.alternatives[0]] : "1",
+                        data.quechua[self.alternatives[1]] : "2", 
+                        data.quechua[self.alternatives[2]] : "3", }
+        
+        for (text, value) in values.items():
+            tk.Radiobutton(master, 
+                            text = text, 
+                            variable= var,
+                            command= lambda: self.selection_user_answer(var), 
+                            value = value).pack(side=LEFT)
         
 
 
 
-
+# Launch app
 root = tk.Tk()
 Quechua(root)
 root.mainloop()
