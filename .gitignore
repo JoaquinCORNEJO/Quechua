@@ -8,9 +8,9 @@
 # Specific file
 gui_weather.py
 App_quechua.py
+raw_quechua.csv
 
 # Directories
 __pycache__/
 env/
 build/
-dist/
