@@ -1,3 +1,4 @@
 *.xlsx
 *.docx
 gui_weather.py
+__pycache__/

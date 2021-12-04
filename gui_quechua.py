@@ -21,9 +21,9 @@ file_phrases = pd.read_csv('./raw_frases.csv',
 # Convert file's type and select groupe of words
 def get_data(subject):
     if subject == 1: 
-        data = pd.DataFrame(data= file_verbs)
-    elif subject == 2: 
         data = pd.DataFrame(data= file_nouns)
+    elif subject == 2: 
+        data = pd.DataFrame(data= file_verbs)
     elif subject == 3:
         data = pd.DataFrame(data= file_phrases)
     return data
@@ -54,19 +54,30 @@ class Quechua(tk.Frame):
 
     def selection_mode(self, var):
         self.mode = var.get()
-        print('Mode %d' %(self.mode,))
 
     def selection_subject(self, var):
         self.subject = var.get()
         self.refresh_data()
-        print('Subject %d' %(self.subject,))
 
     def selection_user_answer(self, var):
         self.user_answer = var.get()
 
+        if self.user_answer == self.ind_right_answer + 1:
+            answer = 'Muy bien !'
+            self.answer['bg'] = 'green'
+        else : 
+            answer = 'Intentalo otra vez'
+            self.answer['bg'] = 'red'
+
+        self.answer['text'] = answer
+
+    def refresh_parent(self, master): 
+        for widget in master.winfo_children():
+            widget.destroy()
+
     def start(self, master): 
+        self.refresh_parent(master)
         self.print_question(master)
-        print('Empezamos a jugar')
 
     def set_constants(self):
         # Set window dimensions
@@ -78,11 +89,11 @@ class Quechua(tk.Frame):
 
     def make_canvas(self):
         self.winfo_toplevel().title('Quechua')
-        self.canvas = tk.Canvas(self, height= self.__HEIGHT, width= self.__WIDTH)
+        self.canvas = tk.Canvas(self, bg= 'white', height= self.__HEIGHT, width= self.__WIDTH)
         self.canvas.pack()
         
         self.img = tk.PhotoImage(file= './lanscape.png') 
-        self.bg = self.canvas.create_image(0, 0, image= self.img, anchor = "nw")
+        self.bg = self.canvas.create_image(0, 0, image= self.img, anchor = 'nw')
 
     def make_title_frame(self): 
         frame_title = tk.Frame(self, bg= '#80c1ff', bd= 5)
@@ -95,6 +106,7 @@ class Quechua(tk.Frame):
         text = tk.StringVar()
         text.set('Bienvenido!\nVamos a aprender quechua')
         text_title = tk.Label(frame_title, 
+                                bg= 'white',
                                 textvariable= text, 
                                 font= ('Arial', 12))
         text_title.place(relwidth= 0.80, 
@@ -161,7 +173,9 @@ class Quechua(tk.Frame):
 
     def print_question(self, master): 
 
-        # ------------------------------------------
+        # Refresh page
+        self.refresh_data()
+
         # Get data
         data = self.data
 
@@ -169,29 +183,39 @@ class Quechua(tk.Frame):
         nb_data_rows = int(data.size/2) # 2 columns
         
         # Create 3 random numbers
-        self.alternatives = random.sample(range(1, nb_data_rows-1), 3)
+        self.alternatives = random.sample(range(1, nb_data_rows-1), 4)
 
         # Select right answers
         self.right_answer = random.choice(self.alternatives)
 
         # Get indice of right answer
-        self.ind_right_answer = self.alternatives.index(self.right_answer) + 1
+        self.ind_right_answer = self.alternatives.index(self.right_answer)
 
         # -----------------------------------
-        varText = tk.StringVar()
+        questionText = tk.StringVar()
         if self.mode == 1: 
-            varText.set("Imatataq castellanopi ninantaq " 
+            questionText.set('Imatataq castellanopi ninantaq "'
                         + data.quechua[self.alternatives[self.ind_right_answer]]
-                        + " ?")
+                        + '" ?')
         elif self.mode == 2:
-            varText.set("Como se dice en quechua "
+            questionText.set('Como se dice en quechua "'
                         + data.espanol[self.alternatives[self.ind_right_answer]]
-                        + " ?")
+                        + '" ?')
         
         question = tk.Label(master, 
-                            text= varText.get(),
-                            font= ('Arial', 11))
-        question.place(relwidth= 1, relheight= 0.1)
+                            bg = 'white',
+                            text= questionText.get(),
+                            font= ('Arial', 14))
+        question.pack()
+
+        # -----------------------------------
+        answerText = tk.StringVar()
+        answerText.set('')
+        self.answer = tk.Label(master, 
+                            bg = 'white',
+                            text= answerText.get(),
+                            font= ('Arial', 14))
+        self.answer.pack()
 
         # Print values
         var = tk.IntVar()
@@ -199,23 +223,24 @@ class Quechua(tk.Frame):
         if self.mode == 1: 
             values = {data.espanol[self.alternatives[0]] : "1",
                         data.espanol[self.alternatives[1]] : "2", 
-                        data.espanol[self.alternatives[2]] : "3", }
+                        data.espanol[self.alternatives[2]] : "3",
+                        data.espanol[self.alternatives[3]] : "4", }
             
         elif self.mode == 2: 
             values = {data.quechua[self.alternatives[0]] : "1",
                         data.quechua[self.alternatives[1]] : "2", 
-                        data.quechua[self.alternatives[2]] : "3", }
+                        data.quechua[self.alternatives[2]] : "3",
+                        data.quechua[self.alternatives[3]] : "4", }
         
         for (text, value) in values.items():
             tk.Radiobutton(master, 
                             text = text, 
+                            bg= 'white',
+                            font= ('Arial', 13),
                             variable= var,
                             command= lambda: self.selection_user_answer(var), 
-                            value = value).pack(side=LEFT)
+                            value = value).pack(fill='both')
         
-
-
-
 # Launch app
 root = tk.Tk()
 Quechua(root)
