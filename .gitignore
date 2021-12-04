@@ -1,4 +1,16 @@
+# Files
 *.xlsx
 *.docx
+*.ico
+*.spec
+*.7z
+
+# Specific file
 gui_weather.py
+App_quechua.py
+
+# Directories
 __pycache__/
+env/
+build/
+dist/
